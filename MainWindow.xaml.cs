@@ -19,9 +19,19 @@ namespace CreateIcon
         public MainWindow()
         {
             InitializeComponent();
-            // Removed automatic export on startup; user now triggers via button.
+            
         }
 
+        /// <summary>
+        /// Handles the click event for the "Load and Create" button.  Allows the user to select a PNG image, displays
+        /// it on a canvas, and generates an ICO file from the image.
+        /// </summary>
+        /// <remarks>This method opens a file dialog for the user to select a PNG image. The selected
+        /// image is loaded  and displayed on a canvas. The canvas is resized to match the dimensions of the image if
+        /// necessary.  An ICO file is automatically generated from the image and saved in an "icon" subdirectory 
+        /// located beside the source PNG file.</remarks>
+        /// <param name="sender">The source of the event, typically the button that was clicked.</param>
+        /// <param name="e">The event data associated with the click event.</param>
         private void BtnLoadAndCreate_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -76,7 +86,16 @@ namespace CreateIcon
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+/// <summary>
+/// Exports the content of a <see cref="Canvas"/> to an ICO file with multiple icon sizes.
+/// </summary>
+/// <remarks>This method generates an ICO file containing multiple icon sizes (16x16, 32x32, 48x48, 64x64,
+/// 128x128, and 256x256 pixels).  The method scales the image from the canvas to fit each size while maintaining the
+/// aspect ratio, and centers it within the icon dimensions.  If the canvas does not contain a valid image, an error
+/// message is displayed, and the method exits without creating a file.</remarks>
+/// <param name="canvas">The <see cref="Canvas"/> containing the image to export. The first child of the canvas must be an <see
+/// cref="Image"/> with a <see cref="BitmapSource"/> as its source.</param>
+/// <param name="filename">The full path of the output ICO file. If the file already exists, it will be overwritten.</param>
         private void ExportToIconFile(Canvas canvas, string filename)
         {
             // Instead of rendering the canvas (which was producing blank/grey),
@@ -151,9 +170,16 @@ namespace CreateIcon
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        // Convert WPF RenderTargetBitmap to System.Drawing.Bitmap (32bpp ARGB)
-        // Convert WPF RenderTargetBitmap (Pbgra32 premultiplied) to non‑premultiplied System.Drawing.Bitmap (32bpp ARGB)
-        private static System.Drawing.Bitmap ToGdiBitmap(BitmapSource src)
+
+        /// <summary>
+        /// Converts a <see cref="BitmapSource"/> to a <see cref="System.Drawing.Bitmap"/>.
+        /// </summary>
+        /// <remarks>This method creates a new <see cref="System.Drawing.Bitmap"/> with a 32bpp ARGB pixel
+        /// format. If the source <see cref="BitmapSource"/> uses the <see cref="PixelFormats.Pbgra32"/> format,  the
+        /// method will un-premultiply the alpha channel to ensure correct color representation.</remarks>
+        /// <param name="src">The <see cref="BitmapSource"/> to convert. Must not be null.</param>
+        /// <returns>A <see cref="System.Drawing.Bitmap"/> representation of the input <see cref="BitmapSource"/>.</returns>
+             private static System.Drawing.Bitmap ToGdiBitmap(BitmapSource src)
         {
             int width = src.PixelWidth;
             int height = src.PixelHeight;
@@ -191,6 +217,15 @@ namespace CreateIcon
             return bmp;
         }
 
+        /// <summary>
+        /// Builds the image data for an icon from the specified bitmap.
+        /// </summary>
+        /// <remarks>The returned byte array represents the image data in a format suitable for use in an
+        /// icon file.  The method generates a 32-bit color XOR mask from the bitmap's pixel data and an opaque AND
+        /// mask. The bitmap is processed bottom-up, as required by the icon format.</remarks>
+        /// <param name="bmp">The <see cref="System.Drawing.Bitmap"/> to convert into icon image data. The bitmap must have a pixel format
+        /// of <see cref="System.Drawing.Imaging.PixelFormat.Format32bppArgb"/>.</param>
+        /// <returns>A byte array containing the icon image data, including both the XOR and AND masks.</returns>
         private static byte[] BuildIconImageData(System.Drawing.Bitmap bmp)
         {
             int width = bmp.Width;
