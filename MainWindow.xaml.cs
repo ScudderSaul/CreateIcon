@@ -60,11 +60,9 @@ namespace CreateIcon
                     Source = bmp,
                     Stretch = Stretch.Uniform
                 };
-                // Let the image keep its natural pixel size; size the canvas explicitly.
-                if (double.IsNaN(IconCanvas.Width) || IconCanvas.Width <= 0)
-                    IconCanvas.Width = bmp.PixelWidth;
-                if (double.IsNaN(IconCanvas.Height) || IconCanvas.Height <= 0)
-                    IconCanvas.Height = bmp.PixelHeight;
+                // Always size the canvas to the image pixel size for an accurate preview
+                IconCanvas.Width = bmp.PixelWidth;
+                IconCanvas.Height = bmp.PixelHeight;
 
                 Canvas.SetLeft(img, 0);
                 Canvas.SetTop(img, 0);
@@ -133,7 +131,11 @@ namespace CreateIcon
                 rtb.Render(dv);
                 rtb.Freeze();
 
-                imageBlobs.Add(BuildIconImageData(ToGdiBitmap(rtb)));
+                // Dispose the GDI+ bitmap after use to avoid leaks
+                using (var gdiBmp = ToGdiBitmap(rtb))
+                {
+                    imageBlobs.Add(BuildIconImageData(gdiBmp));
+                }
             }
 
             using (var fs = new FileStream(filename, FileMode.Create))
@@ -230,6 +232,17 @@ namespace CreateIcon
         {
             int width = bmp.Width;
             int height = bmp.Height;
+
+            // Use PNG encoding for 256x256 entries for better compatibility
+            if (width == 256 && height == 256)
+            {
+                using (var msPng = new MemoryStream())
+                {
+                    bmp.Save(msPng, ImageFormat.Png);
+                    return msPng.ToArray();
+                }
+            }
+
             const int headerSize = 40;
             int xorStride = width * 4; // logical row size we will write
             int andStrideBytes = ((width + 31) / 32) * 4;
