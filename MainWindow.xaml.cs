@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using SDrawing = System.Drawing;
-using SDI = System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 
 
 namespace CreateIcon
@@ -84,16 +80,16 @@ namespace CreateIcon
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-/// <summary>
-/// Exports the content of a <see cref="Canvas"/> to an ICO file with multiple icon sizes.
-/// </summary>
-/// <remarks>This method generates an ICO file containing multiple icon sizes (16x16, 32x32, 48x48, 64x64,
-/// 128x128, and 256x256 pixels).  The method scales the image from the canvas to fit each size while maintaining the
-/// aspect ratio, and centers it within the icon dimensions.  If the canvas does not contain a valid image, an error
-/// message is displayed, and the method exits without creating a file.</remarks>
-/// <param name="canvas">The <see cref="Canvas"/> containing the image to export. The first child of the canvas must be an <see
-/// cref="Image"/> with a <see cref="BitmapSource"/> as its source.</param>
-/// <param name="filename">The full path of the output ICO file. If the file already exists, it will be overwritten.</param>
+        /// <summary>
+        /// Exports the content of a <see cref="Canvas"/> to an ICO file with multiple icon sizes.
+        /// </summary>
+        /// <remarks>This method generates an ICO file containing multiple icon sizes (16x16, 32x32, 48x48, 64x64,
+        /// 128x128, and 256x256 pixels).  The method scales the image from the canvas to fit each size while maintaining the
+        /// aspect ratio, and centers it within the icon dimensions.  If the canvas does not contain a valid image, an error
+        /// message is displayed, and the method exits without creating a file.</remarks>
+        /// <param name="canvas">The <see cref="Canvas"/> containing the image to export. The first child of the canvas must be an <see
+        /// cref="Image"/> with a <see cref="BitmapSource"/> as its source.</param>
+        /// <param name="filename">The full path of the output ICO file. If the file already exists, it will be overwritten.</param>
         private void ExportToIconFile(Canvas canvas, string filename)
         {
             // Instead of rendering the canvas (which was producing blank/grey),
@@ -131,11 +127,8 @@ namespace CreateIcon
                 rtb.Render(dv);
                 rtb.Freeze();
 
-                // Dispose the GDI+ bitmap after use to avoid leaks
-                using (var gdiBmp = ToGdiBitmap(rtb))
-                {
-                    imageBlobs.Add(BuildIconImageData(gdiBmp));
-                }
+                // WPF-only: encode each size as PNG and embed directly into ICO (supported on modern Windows)
+                imageBlobs.Add(EncodeToPngBytes(rtb));
             }
 
             using (var fs = new FileStream(filename, FileMode.Create))
@@ -172,124 +165,14 @@ namespace CreateIcon
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-
-        /// <summary>
-        /// Converts a <see cref="BitmapSource"/> to a <see cref="System.Drawing.Bitmap"/>.
-        /// </summary>
-        /// <remarks>This method creates a new <see cref="System.Drawing.Bitmap"/> with a 32bpp ARGB pixel
-        /// format. If the source <see cref="BitmapSource"/> uses the <see cref="PixelFormats.Pbgra32"/> format,  the
-        /// method will un-premultiply the alpha channel to ensure correct color representation.</remarks>
-        /// <param name="src">The <see cref="BitmapSource"/> to convert. Must not be null.</param>
-        /// <returns>A <see cref="System.Drawing.Bitmap"/> representation of the input <see cref="BitmapSource"/>.</returns>
-             private static System.Drawing.Bitmap ToGdiBitmap(BitmapSource src)
+        // WPF-only helper to encode a BitmapSource to PNG bytes
+        private static byte[] EncodeToPngBytes(BitmapSource src)
         {
-            int width = src.PixelWidth;
-            int height = src.PixelHeight;
-            int stride = width * 4;
-            byte[] pixels = new byte[stride * height];
-            src.CopyPixels(pixels, stride, 0);
-
-            // Un-premultiply if needed (Pbgra32 -> straight alpha)
-            if (src.Format == PixelFormats.Pbgra32)
-            {
-                for (int i = 0; i < pixels.Length; i += 4)
-                {
-                    byte a = pixels[i + 3];
-                    if (a > 0 && a < 255)
-                    {
-                        // channels in order: B,G,R,A
-                        pixels[i + 0] = (byte)Math.Min(255, (pixels[i + 0] * 255 + (a / 2)) / a);
-                        pixels[i + 1] = (byte)Math.Min(255, (pixels[i + 1] * 255 + (a / 2)) / a);
-                        pixels[i + 2] = (byte)Math.Min(255, (pixels[i + 2] * 255 + (a / 2)) / a);
-                    }
-                }
-            }
-
-            var bmp = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, width, height),
-                System.Drawing.Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat);
-            try
-            {
-                Marshal.Copy(pixels, 0, data.Scan0, pixels.Length);
-            }
-            finally
-            {
-                bmp.UnlockBits(data);
-            }
-            return bmp;
-        }
-
-        /// <summary>
-        /// Builds the image data for an icon from the specified bitmap.
-        /// </summary>
-        /// <remarks>The returned byte array represents the image data in a format suitable for use in an
-        /// icon file.  The method generates a 32-bit color XOR mask from the bitmap's pixel data and an opaque AND
-        /// mask. The bitmap is processed bottom-up, as required by the icon format.</remarks>
-        /// <param name="bmp">The <see cref="System.Drawing.Bitmap"/> to convert into icon image data. The bitmap must have a pixel format
-        /// of <see cref="System.Drawing.Imaging.PixelFormat.Format32bppArgb"/>.</param>
-        /// <returns>A byte array containing the icon image data, including both the XOR and AND masks.</returns>
-        private static byte[] BuildIconImageData(System.Drawing.Bitmap bmp)
-        {
-            int width = bmp.Width;
-            int height = bmp.Height;
-
-            // Use PNG encoding for 256x256 entries for better compatibility
-            if (width == 256 && height == 256)
-            {
-                using (var msPng = new MemoryStream())
-                {
-                    bmp.Save(msPng, ImageFormat.Png);
-                    return msPng.ToArray();
-                }
-            }
-
-            const int headerSize = 40;
-            int xorStride = width * 4; // logical row size we will write
-            int andStrideBytes = ((width + 31) / 32) * 4;
-            int andMaskSize = andStrideBytes * height;
-
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(src));
             using (var ms = new MemoryStream())
-            using (var bw = new BinaryWriter(ms))
             {
-                // BITMAPINFOHEADER
-                bw.Write(headerSize);
-                bw.Write(width);
-                bw.Write(height * 2);   // XOR + AND
-                bw.Write((short)1);
-                bw.Write((short)32);
-                bw.Write(0);
-                bw.Write(xorStride * height);
-                bw.Write(0); bw.Write(0);
-                bw.Write(0); bw.Write(0);
-
-                var bmpData = bmp.LockBits(
-                    new System.Drawing.Rectangle(0, 0, width, height),
-                    System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                try
-                {
-                    int srcStride = bmpData.Stride;
-                    int total = srcStride * height;
-                    byte[] pixelData = new byte[total];
-                    Marshal.Copy(bmpData.Scan0, pixelData, 0, total);
-
-                    // Write rows bottom-up (only the meaningful width*4 bytes per row)
-                    for (int y = height - 1; y >= 0; y--)
-                    {
-                        bw.Write(pixelData, y * srcStride, xorStride);
-                    }
-                }
-                finally
-                {
-                    bmp.UnlockBits(bmpData);
-                }
-
-                // AND mask (opaque)
-                byte[] andRow = new byte[andStrideBytes];
-                for (int y = 0; y < height; y++)
-                    bw.Write(andRow);
-
+                encoder.Save(ms);
                 return ms.ToArray();
             }
         }
