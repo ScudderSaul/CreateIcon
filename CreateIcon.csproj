@@ -3,9 +3,10 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>RedCat_S_214434604.ico</ApplicationIcon>
+    <ApplicationIcon>RedCat_S_1174090775.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Resource Include="RedCat_S_214434604.ico" />
+    <!-- Ensure icon is embedded as a WPF resource -->
+    <Resource Include="RedCat_S_1174090775.ico" />
   </ItemGroup>
 </Project>
