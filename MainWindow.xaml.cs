@@ -176,6 +176,16 @@ namespace CreateIcon
                 return ms.ToArray();
             }
         }
+
+        private void BtnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            HelpPopup.IsOpen = true;
+        }
+
+        private void HelpClose_Click(object sender, RoutedEventArgs e)
+        {
+            HelpPopup.IsOpen = false;
+        }
     }
 }
     

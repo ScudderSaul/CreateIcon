@@ -7,45 +7,90 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Margin="8" VerticalAlignment="Center">
-            <!-- Use existing embedded icon file -->
-            <Image x:Name="AppIconImage"
-               Width="24"
-               Height="24"
-               Margin="0,0,8,0"
-               Stretch="Uniform"
-               Source="RedCat_S_1174090775.ico" />
-            <Button x:Name="BtnLoadAndCreate"
-                Width="180"
-                Height="32"
-                Padding="8,4"
-                Click="BtnLoadAndCreate_Click"
-                Content="Create Icon From PNG"/>
-        </StackPanel>
+
+        <DockPanel Margin="8" LastChildFill="false">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
+                <!-- Use existing embedded icon file -->
+                <Image x:Name="AppIconImage"
+                       Width="24"
+                       Height="24"
+                       Margin="0,0,8,0"
+                       Stretch="Uniform"
+                       Source="RedCat_S_1174090775.ico" />
+                <Button x:Name="BtnLoadAndCreate"
+                        Width="180"
+                        Height="32"
+                        Padding="8,4"
+                        Click="BtnLoadAndCreate_Click"
+                        Content="Create Icon From PNG"/>
+            </StackPanel>
+
+            <Button x:Name="BtnHelp"
+                    DockPanel.Dock="Right"
+                    Width="80"
+                    Height="32"
+                    Padding="8,4"
+                    Margin="12,0,0,0"
+                    Click="BtnHelp_Click"
+                    Content="Help" />
+        </DockPanel>
+
+        <Popup x:Name="HelpPopup"
+               Grid.Row="0"
+               PlacementTarget="{Binding ElementName=BtnHelp}"
+               Placement="Bottom"
+               AllowsTransparency="True"
+               StaysOpen="False">
+            <Border Background="#FDFDFD" BorderBrush="#D0D0D0" BorderThickness="1" CornerRadius="6" Padding="12" MaxWidth="420">
+                <StackPanel>
+                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="How to use" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap">
+                        1) Click “Create Icon From PNG”.
+
+                        2) Choose a PNG file.
+
+                        3) The preview updates to show the selected image.
+
+                        4) An .ico is created automatically in an “icon” subfolder next to the PNG.
+                    </TextBlock>
+
+                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="Actions" Margin="0,12,0,8"/>
+                    <TextBlock TextWrapping="Wrap">
+                        • Creates a multi-size ICO (16, 32, 48, 64, 128, 256).
+
+                        • Keeps aspect ratio and centers the image.
+
+                        • Overwrites the .ico if it already exists.
+                    </TextBlock>
+
+                    <Button HorizontalAlignment="Right" Margin="0,12,0,0" Padding="10,4" Content="Close" Click="HelpClose_Click" />
+                </StackPanel>
+            </Border>
+        </Popup>
 
         <ScrollViewer Grid.Row="1"
-                  HorizontalScrollBarVisibility="Auto"
-                  VerticalScrollBarVisibility="Auto"
-                  Background="#1E1E1E"
-                  Padding="12">
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"
+                      Background="#1E1E1E"
+                      Padding="12">
             <Canvas x:Name="IconCanvas"
-                Width="256"
-                Height="256"
-                Background="Transparent">
+                    Width="256"
+                    Height="256"
+                    Background="Transparent">
                 <!-- Default sample content (can be replaced when PNG is loaded) -->
                 <Rectangle Width="256" Height="256" Fill="#202020" RadiusX="40" RadiusY="40"/>
                 <Rectangle Canvas.Left="28" Canvas.Top="28" Width="200" Height="140"
-                       Fill="#101010" Stroke="#4090FF" StrokeThickness="4"
-                       RadiusX="8" RadiusY="8"/>
+                           Fill="#101010" Stroke="#4090FF" StrokeThickness="4"
+                           RadiusX="8" RadiusY="8"/>
                 <Path Fill="#4090FF" Data="M 100,73 L 100,123 L 156,98 Z"/>
                 <Path Fill="#80FFFFFF"
-                  Data="M28,188 C48,168 68,208 88,188 C108,168 128,208 148,188 C168,168 188,208 208,188 C228,168 228,188 228,188 L228,208 L28,208 Z"/>
+                      Data="M28,188 C48,168 68,208 88,188 C108,168 128,208 148,188 C168,168 188,208 208,188 C228,168 228,188 228,188 L228,208 L28,208 Z"/>
                 <TextBlock Canvas.Left="96" Canvas.Top="208"
-                       FontFamily="Segoe UI"
-                       FontWeight="Bold"
-                       FontSize="28"
-                       Foreground="White"
-                       Text="MP4"/>
+                           FontFamily="Segoe UI"
+                           FontWeight="Bold"
+                           FontSize="28"
+                           Foreground="White"
+                           Text="MP4"/>
             </Canvas>
         </ScrollViewer>
     </Grid>
