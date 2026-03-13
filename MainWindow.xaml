@@ -23,6 +23,13 @@
                         Padding="8,4"
                         Click="BtnLoadAndCreate_Click"
                         Content="Create Icon From PNG"/>
+                <Button x:Name="BtnLoadSvgAndCreate"
+                        Width="180"
+                        Height="32"
+                        Padding="8,4"
+                        Margin="8,0,0,0"
+                        Click="BtnLoadSvgAndCreate_Click"
+                        Content="Create Icon From SVG"/>
             </StackPanel>
 
             <Button x:Name="BtnHelp"
@@ -45,13 +52,13 @@
                 <StackPanel>
                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="How to use" Margin="0,0,0,8"/>
                     <TextBlock TextWrapping="Wrap">
-                        1) Click “Create Icon From PNG”.
+                        1) Click “Create Icon From PNG” or “Create Icon From SVG”.
 
-                        2) Choose a PNG file.
+                        2) Choose a PNG or SVG file.
 
                         3) The preview updates to show the selected image.
 
-                        4) An .ico is created automatically in an “icon” subfolder next to the PNG.
+                        4) An .ico is created automatically in an “icon” subfolder next to the source file.
                     </TextBlock>
 
                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="Actions" Margin="0,12,0,8"/>

@@ -9,4 +9,8 @@
     <!-- Ensure icon is embedded as a WPF resource -->
     <Resource Include="RedCat_S_1174090775.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="Svg.Skia" Version="3.0.4.1" />
+  </ItemGroup>
 </Project>
