@@ -246,9 +246,118 @@ namespace CreateIcon
             HelpPopup.IsOpen = true;
         }
 
+        private void SaveSampleSvg_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var saveDialog = new SaveFileDialog
+                {
+                    Title = "Save Sample SVG",
+                    Filter = "SVG Images (*.svg)|*.svg",
+                    DefaultExt = ".svg",
+                    FileName = "sample-dragon.svg",
+                    AddExtension = true,
+                    OverwritePrompt = true
+                };
+
+                if (saveDialog.ShowDialog(this) != true)
+                    return;
+
+                File.WriteAllText(saveDialog.FileName, GetSampleDragonSvg());
+                MessageBox.Show(this, "Sample SVG file created:\n" + saveDialog.FileName, "Success",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Unable to save sample SVG: " + ex.Message, "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void HelpClose_Click(object sender, RoutedEventArgs e)
         {
             HelpPopup.IsOpen = false;
         }
+
+        private static string GetSampleDragonSvg() =>
+            """
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <defs>
+                <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#1f1634"/>
+                  <stop offset="100%" stop-color="#3b1020"/>
+                </linearGradient>
+                <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ff8661"/>
+                  <stop offset="45%" stop-color="#d63838"/>
+                  <stop offset="100%" stop-color="#7f1020"/>
+                </linearGradient>
+                <linearGradient id="wing" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#fff3a8"/>
+                  <stop offset="45%" stop-color="#f5c84b"/>
+                  <stop offset="100%" stop-color="#bb7a12"/>
+                </linearGradient>
+                <radialGradient id="flame" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fff9d4"/>
+                  <stop offset="35%" stop-color="#ffd34d"/>
+                  <stop offset="70%" stop-color="#ff7a1f"/>
+                  <stop offset="100%" stop-color="#c91b00"/>
+                </radialGradient>
+                <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="6" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <rect width="512" height="512" rx="72" fill="url(#bg)"/>
+
+              <ellipse cx="270" cy="435" rx="165" ry="34" fill="#00000055"/>
+
+              <g transform="translate(18 8)">
+                <path d="M198 270 C142 212, 122 132, 152 84 C206 98, 255 140, 284 218 C259 232, 228 249, 198 270 Z"
+                      fill="url(#wing)" stroke="#fff2b0" stroke-width="7" opacity="0.96"/>
+                <path d="M251 248 C196 179, 187 94, 220 48 C287 83, 338 155, 352 241 C320 239, 286 242, 251 248 Z"
+                      fill="url(#wing)" stroke="#fff2b0" stroke-width="7" opacity="0.98"/>
+                <path d="M214 271 C169 225, 156 158, 174 110" fill="none" stroke="#c98d21" stroke-width="5" opacity="0.8"/>
+                <path d="M269 244 C237 194, 239 128, 255 80" fill="none" stroke="#c98d21" stroke-width="5" opacity="0.8"/>
+
+                <path d="M131 373 C91 340, 86 289, 122 258 C155 230, 215 231, 255 252 C296 273, 331 319, 349 345 C382 393, 383 428, 356 445 C325 464, 269 453, 230 427 C207 412, 189 391, 169 385 C151 379, 141 380, 131 373 Z"
+                      fill="url(#body)" stroke="#5a0914" stroke-width="8"/>
+
+                <path d="M121 261 C102 230, 109 192, 145 172 C186 149, 242 157, 281 182 C321 207, 344 250, 334 285 C302 251, 246 227, 194 226 C161 225, 136 237, 121 261 Z"
+                      fill="#a3182b" opacity="0.82"/>
+
+                <path d="M323 249 C360 224, 404 220, 438 236 C469 252, 480 287, 462 314 C444 341, 401 352, 362 343 C331 337, 306 322, 291 304 C305 290, 315 271, 323 249 Z"
+                      fill="url(#body)" stroke="#5a0914" stroke-width="8"/>
+
+                <ellipse cx="369" cy="284" rx="65" ry="58" fill="#cf3042" opacity="0.7"/>
+                <path d="M338 245 L359 213 L376 245" fill="#ffd34d" stroke="#8b4d00" stroke-width="5"/>
+                <path d="M366 236 L388 200 L406 239" fill="#ffd34d" stroke="#8b4d00" stroke-width="5"/>
+                <path d="M393 241 L415 213 L430 247" fill="#ffd34d" stroke="#8b4d00" stroke-width="5"/>
+
+                <ellipse cx="392" cy="279" rx="15" ry="18" fill="#fffaf0"/>
+                <ellipse cx="396" cy="282" rx="7" ry="9" fill="#191919"/>
+                <circle cx="399" cy="279" r="2.4" fill="#ffffff"/>
+
+                <path d="M440 295 C460 292, 480 304, 490 322 C469 321, 454 320, 440 317 Z" fill="#5a0914"/>
+                <path d="M487 318 C520 300, 546 297, 573 303 C546 316, 527 327, 501 343 C484 352, 459 356, 437 347 C457 342, 474 332, 487 318 Z"
+                      transform="translate(-8 0)"
+                      fill="url(#flame)" filter="url(#glow)"/>
+                <path d="M495 330 C523 324, 546 332, 568 349 C540 351, 517 359, 490 373 C472 382, 448 384, 425 374 C451 367, 473 353, 495 330 Z"
+                      transform="translate(-10 6)"
+                      fill="#ffb11b" opacity="0.85" filter="url(#glow)"/>
+
+                <path d="M140 387 C111 395, 95 419, 85 448" fill="none" stroke="#5a0914" stroke-width="14" stroke-linecap="round"/>
+                <path d="M181 409 C156 425, 149 449, 150 475" fill="none" stroke="#5a0914" stroke-width="14" stroke-linecap="round"/>
+                <path d="M286 427 C268 446, 265 464, 270 482" fill="none" stroke="#5a0914" stroke-width="14" stroke-linecap="round"/>
+
+                <path d="M108 351 C77 335, 55 311, 49 286 C84 293, 115 309, 138 330" fill="none" stroke="#7f1020" stroke-width="18" stroke-linecap="round"/>
+                <path d="M58 286 C78 279, 96 282, 112 291" fill="none" stroke="#ffd34d" stroke-width="7" stroke-linecap="round"/>
+              </g>
+            </svg>
+            """;
     }
 }
